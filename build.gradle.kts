@@ -1,5 +1,5 @@
 plugins {
-    java
+    id("application")
     id("org.springframework.boot") version "4.1.2"
     id("io.spring.dependency-management") version "1.1.7"
 }
@@ -8,9 +8,12 @@ group = "Hexlet.trainee"
 version = "0.0.1-SNAPSHOT"
 description = "SpringTrainee"
 
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(25)
+application {
+    mainClass.set("hexlet.trainee.springtrainee.Main")
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(25)
+        }
     }
 }
 
