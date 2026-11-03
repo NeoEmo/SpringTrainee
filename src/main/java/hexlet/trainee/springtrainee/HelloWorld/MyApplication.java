@@ -1,4 +1,4 @@
-package hexlet.trainee.springtrainee.HelloWorld;
+package hexlet.trainee.springtrainee.helloWorld;
 
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.web.bind.annotation.RequestMapping;
