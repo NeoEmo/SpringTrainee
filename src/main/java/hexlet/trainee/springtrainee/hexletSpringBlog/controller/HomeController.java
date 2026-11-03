@@ -1,4 +1,4 @@
-package hexlet.trainee.springtrainee.hexletSpringBlog;
+package hexlet.trainee.springtrainee.hexletSpringBlog.controller;
 
 
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @SpringBootApplication
 public class HomeController {
-    @GetMapping
+    @GetMapping("/")
     public String home() {
         return "Добро пожаловать в Hexlet Spring Blog!";
     }
