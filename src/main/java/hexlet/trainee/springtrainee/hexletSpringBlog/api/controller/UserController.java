@@ -1,6 +1,10 @@
 package hexlet.trainee.springtrainee.hexletSpringBlog.api.controller;
 
 import hexlet.trainee.springtrainee.hexletSpringBlog.model.User;
+
+import hexlet.trainee.springtrainee.hexletSpringBlog.repository.UsersRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,26 +18,25 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
-    private List<User> users =  new ArrayList<User>();
-    private Long userId = 1L;
+
+    @Autowired
+    private UsersRepository usersRepository;
 
     @GetMapping
     public ResponseEntity<List<User>> index(@RequestParam(defaultValue = "10") Integer limit) {
-        var result = users.stream().limit(limit).toList();
+        var result = usersRepository.findAll(PageRequest.of(0, limit));
 
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok().body(result.getContent());
     }
 
     @PostMapping
     public ResponseEntity<User> post(@RequestBody User user) {
-        user.setId(userId++);
-        users.add(user);
+        usersRepository.save(user);
 
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
@@ -46,14 +49,12 @@ public class UserController {
 
     @GetMapping("/{id}")
     public ResponseEntity<User> get(@PathVariable Long id) {
-        var user = users.stream().filter(u -> u.getId().equals(id)).findFirst();
-
-        return ResponseEntity.of(user);
+        return ResponseEntity.of(usersRepository.findById(id));
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<User> patch(@PathVariable Long id, @RequestBody User data) {
-        var optionalUser = users.stream().filter(u -> u.getId().equals(id)).findFirst();
+        var optionalUser = usersRepository.findById(id);
 
         if (optionalUser.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -63,16 +64,17 @@ public class UserController {
         if (data.getEmail() != null) user.setEmail(data.getEmail());
         if (data.getPassword() != null) user.setPassword(data.getPassword());
         if (data.getUsername() != null) user.setUsername(data.getUsername());
+        usersRepository.save(user);
 
         return ResponseEntity.ok().body(user);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<User> delete(@PathVariable Long id) {
-        var isRemoved = users.removeIf(u -> u.getId().equals(id));
-        if (!isRemoved) {
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        if (!usersRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
+        usersRepository.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 }

@@ -2,34 +2,44 @@ package hexlet.trainee.springtrainee.hexletSpringBlog.api.controller;
 
 import hexlet.trainee.springtrainee.hexletSpringBlog.model.Post;
 
+import hexlet.trainee.springtrainee.hexletSpringBlog.repository.PostsRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 
 @RestController
 @RequestMapping("/api/posts")
 public class PostsController {
-    private List<Post> posts =  new ArrayList<>();
-    private Long post_id = 1L;
+
+    @Autowired
+    private PostsRepository postsRepository;
 
     @GetMapping
     public ResponseEntity<List<Post>> index(@RequestParam(defaultValue = "10") Integer limit) {
-        var result = posts.stream().limit(limit).toList();
+        var result = postsRepository.findAll(PageRequest.of(0, limit));
 
-        return ResponseEntity.ok().body(result);
+        return ResponseEntity.ok().body(result.getContent());
     }
 
     @PostMapping
     public ResponseEntity<Post> create(@RequestBody Post post) {
-        post.setId(post_id++);
         post.setCreatedAt(LocalDateTime.now());
-        posts.add(post);
+        postsRepository.save(post);
 
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
@@ -42,14 +52,12 @@ public class PostsController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Post> show(@PathVariable Long id) {
-        var post = posts.stream().filter(p -> p.getId().equals(id)).findFirst();
-
-        return ResponseEntity.of(post);
+        return ResponseEntity.of(postsRepository.findById(id));
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<Post> update(@PathVariable Long id, @RequestBody Post data) {
-        var postOptional = posts.stream().filter(p -> p.getId().equals(id)).findFirst();
+        var postOptional = postsRepository.findById(id);
 
         if(postOptional.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -59,16 +67,17 @@ public class PostsController {
         if (data.getTitle() != null) post.setTitle(data.getTitle());
         if (data.getContent() != null) post.setContent(data.getContent());
         if (data.getAuthor() != null) post.setAuthor(data.getAuthor());
+        postsRepository.save(post);
 
         return ResponseEntity.ok().body(post);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        var isRemoved = posts.removeIf(p -> p.getId().equals(id));
-        if (!isRemoved) {
+        if (!postsRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
+        postsRepository.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 }
