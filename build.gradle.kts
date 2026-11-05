@@ -27,11 +27,15 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     implementation("org.springframework.boot:spring-boot-starter-web")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    testImplementation("org.springframework.boot:spring-boot-starter-data-jpa-test")
 
-    compileOnly("org.projectlombok:lombok:1.18.48")
-    annotationProcessor("org.projectlombok:lombok:1.18.48")
-    testCompileOnly("org.projectlombok:lombok:1.18.48")
-    testAnnotationProcessor("org.projectlombok:lombok:1.18.48")
+    runtimeOnly("com.h2database:h2")
+
+    compileOnly("org.projectlombok:lombok")
+    annotationProcessor("org.projectlombok:lombok")
+    testCompileOnly("org.projectlombok:lombok")
+    testAnnotationProcessor("org.projectlombok:lombok")
 }
 
 tasks.withType<Test> {
