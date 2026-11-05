@@ -1,8 +1,6 @@
 package hexlet.trainee.springtrainee.responseEntity;
 
 import hexlet.trainee.springtrainee.responseEntity.model.Page;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,14 +8,10 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
-@SpringBootApplication
 @RestController
-public class Application {
+@RequestMapping("/response")
+public class ResponseEntityController {
     private List<Page> pages = new ArrayList<>();
-
-    static void main(String[] args) {
-        SpringApplication.run(Application.class, args);
-    }
 
     @GetMapping("/pages")
     public ResponseEntity<List<Page>> index(@RequestParam(defaultValue = "10") Integer limit) {

@@ -1,17 +1,9 @@
-package hexlet.trainee.springtrainee.hexletSpringBlog.controller;
+package hexlet.trainee.springtrainee.hexletSpringBlog.api.controller;
 
 import hexlet.trainee.springtrainee.hexletSpringBlog.model.Post;
-import org.springframework.http.HttpStatus;
+
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
@@ -21,7 +13,7 @@ import java.util.List;
 
 
 @RestController
-@RequestMapping("/posts")
+@RequestMapping("/api/posts")
 public class PostsController {
     private List<Post> posts =  new ArrayList<>();
     private Long post_id = 1L;
@@ -55,7 +47,7 @@ public class PostsController {
         return ResponseEntity.of(post);
     }
 
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     public ResponseEntity<Post> update(@PathVariable Long id, @RequestBody Post data) {
         var postOptional = posts.stream().filter(p -> p.getId().equals(id)).findFirst();
 
@@ -64,9 +56,9 @@ public class PostsController {
         }
 
         var post = postOptional.get();
-        post.setTitle(data.getTitle());
-        post.setContent(data.getContent());
-        post.setAuthor(data.getAuthor());
+        if (data.getTitle() != null) post.setTitle(data.getTitle());
+        if (data.getContent() != null) post.setContent(data.getContent());
+        if (data.getAuthor() != null) post.setAuthor(data.getAuthor());
 
         return ResponseEntity.ok().body(post);
     }
