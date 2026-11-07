@@ -40,7 +40,6 @@ public class PostsController {
 
     @PostMapping
     public ResponseEntity<Post> create(@Valid @RequestBody Post post) {
-        post.setCreatedAt(LocalDateTime.now());
         postsRepository.save(post);
 
         URI location = ServletUriComponentsBuilder
