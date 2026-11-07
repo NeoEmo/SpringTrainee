@@ -1,8 +1,10 @@
 package hexlet.trainee.springtrainee.hexletSpringBlog.api.controller;
 
+import hexlet.trainee.springtrainee.hexletSpringBlog.exception.ResourcesNotFoundException;
 import hexlet.trainee.springtrainee.hexletSpringBlog.model.Post;
 
 import hexlet.trainee.springtrainee.hexletSpringBlog.repository.PostsRepository;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
@@ -37,7 +39,7 @@ public class PostsController {
     }
 
     @PostMapping
-    public ResponseEntity<Post> create(@RequestBody Post post) {
+    public ResponseEntity<Post> create(@Valid @RequestBody Post post) {
         post.setCreatedAt(LocalDateTime.now());
         postsRepository.save(post);
 
@@ -52,7 +54,10 @@ public class PostsController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Post> show(@PathVariable Long id) {
-        return ResponseEntity.of(postsRepository.findById(id));
+        var post = postsRepository.findById(id)
+                .orElseThrow(() -> new ResourcesNotFoundException("Post with id " + id + " not found"));
+
+        return ResponseEntity.ok().body(post);
     }
 
     @PatchMapping("/{id}")

@@ -1,8 +1,10 @@
 package hexlet.trainee.springtrainee.hexletSpringBlog.api.controller;
 
+import hexlet.trainee.springtrainee.hexletSpringBlog.exception.ResourcesNotFoundException;
 import hexlet.trainee.springtrainee.hexletSpringBlog.model.User;
 
 import hexlet.trainee.springtrainee.hexletSpringBlog.repository.UsersRepository;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +23,7 @@ import java.net.URI;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping(        "/api/users")
 public class UserController {
 
     @Autowired
@@ -35,7 +37,7 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<User> post(@RequestBody User user) {
+    public ResponseEntity<User> post(@Valid @RequestBody User user) {
         usersRepository.save(user);
 
         URI location = ServletUriComponentsBuilder
@@ -49,7 +51,10 @@ public class UserController {
 
     @GetMapping("/{id}")
     public ResponseEntity<User> get(@PathVariable Long id) {
-        return ResponseEntity.of(usersRepository.findById(id));
+        var user = usersRepository.findById(id)
+                .orElseThrow(() -> new ResourcesNotFoundException("User with id " + id + " not found"));
+
+        return ResponseEntity.ok().body(user);
     }
 
     @PatchMapping("/{id}")
