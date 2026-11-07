@@ -6,7 +6,9 @@ import hexlet.trainee.springtrainee.hexletSpringBlog.model.User;
 import hexlet.trainee.springtrainee.hexletSpringBlog.repository.UsersRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,20 +22,21 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-import java.util.List;
 
 @RestController
-@RequestMapping(        "/api/users")
+@RequestMapping("/api/users")
 public class UserController {
 
     @Autowired
     private UsersRepository usersRepository;
 
     @GetMapping
-    public ResponseEntity<List<User>> index(@RequestParam(defaultValue = "10") Integer limit) {
-        var result = usersRepository.findAll(PageRequest.of(0, limit));
+    public ResponseEntity<Page<User>> index(
+            @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int size) {
+        var safePage = Math.max(0, page - 1);
+        var result = PageRequest.of(safePage, size);
 
-        return ResponseEntity.ok().body(result.getContent());
+        return ResponseEntity.ok().body(usersRepository.findByOrderByCreatedAtDesc(result));
     }
 
     @PostMapping

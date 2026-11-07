@@ -6,7 +6,9 @@ import hexlet.trainee.springtrainee.hexletSpringBlog.model.Post;
 import hexlet.trainee.springtrainee.hexletSpringBlog.repository.PostsRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,8 +22,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-import java.time.LocalDateTime;
-import java.util.List;
 
 
 @RestController
@@ -32,10 +32,12 @@ public class PostsController {
     private PostsRepository postsRepository;
 
     @GetMapping
-    public ResponseEntity<List<Post>> index(@RequestParam(defaultValue = "10") Integer limit) {
-        var result = postsRepository.findAll(PageRequest.of(0, limit));
+    public ResponseEntity<Page<Post>> index(
+            @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int size) {
+        var safePage = Math.max(0, page - 1);
+        Pageable result = PageRequest.of(safePage, size);
 
-        return ResponseEntity.ok().body(result.getContent());
+        return ResponseEntity.ok().body(postsRepository.findByOrderByCreatedAtDesc(result));
     }
 
     @PostMapping
