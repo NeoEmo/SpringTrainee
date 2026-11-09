@@ -1,5 +1,6 @@
 package hexlet.trainee.springtrainee.hexletSpringBlog.api.controller;
 
+import hexlet.trainee.springtrainee.hexletSpringBlog.exception.ResourceAlreadyExistException;
 import hexlet.trainee.springtrainee.hexletSpringBlog.exception.ResourcesNotFoundException;
 import hexlet.trainee.springtrainee.hexletSpringBlog.model.User;
 
@@ -41,6 +42,14 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<User> post(@Valid @RequestBody User user) {
+        if (usersRepository.existsByEmail(user.getEmail())) {
+            throw new ResourceAlreadyExistException("Email already exist");
+        }
+        if (usersRepository.existsByUsername(user.getUsername())) {
+            throw new ResourceAlreadyExistException("Username already exist");
+        }
+
+
         usersRepository.save(user);
 
         URI location = ServletUriComponentsBuilder
@@ -49,7 +58,7 @@ public class UserController {
                 .buildAndExpand(user.getId())
                 .toUri();
 
-        return ResponseEntity.created(location).build();
+        return ResponseEntity.created(location).body(user);
     }
 
     @GetMapping("/{id}")
@@ -62,13 +71,10 @@ public class UserController {
 
     @PatchMapping("/{id}")
     public ResponseEntity<User> patch(@PathVariable Long id, @RequestBody User data) {
-        var optionalUser = usersRepository.findById(id);
+        var user = usersRepository.findById(id)
+                .orElseThrow(() -> new ResourcesNotFoundException("User with id " + id + " not found"));
 
-        if (optionalUser.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
 
-        var user = optionalUser.get();
         if (data.getEmail() != null) user.setEmail(data.getEmail());
         if (data.getPassword() != null) user.setPassword(data.getPassword());
         if (data.getUsername() != null) user.setUsername(data.getUsername());

@@ -9,5 +9,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PostsRepository extends JpaRepository<Post,Long> {
     Page<Post> findByOrderByCreatedAtDesc(Pageable pageable);
+    boolean existsByTitle(String title);
 
 }

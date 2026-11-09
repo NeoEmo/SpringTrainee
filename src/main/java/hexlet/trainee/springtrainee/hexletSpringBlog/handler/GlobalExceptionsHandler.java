@@ -1,6 +1,7 @@
 package hexlet.trainee.springtrainee.hexletSpringBlog.handler;
 
 
+import hexlet.trainee.springtrainee.hexletSpringBlog.exception.ResourceAlreadyExistException;
 import hexlet.trainee.springtrainee.hexletSpringBlog.exception.ResourcesNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,5 +29,10 @@ public class GlobalExceptionsHandler {
         String message = "Внутренняя ошибка сервера. Попробуйте другие запросы.";
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(Map.of("message", message));
+    }
+
+    @ExceptionHandler(ResourceAlreadyExistException.class)
+    public ResponseEntity<Map<String, String>> handleAlreadyExist(ResourceAlreadyExistException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("message", ex.getMessage()));
     }
 }
