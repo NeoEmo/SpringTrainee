@@ -34,7 +34,7 @@ public class Post {
     private String title;
 
     @NotBlank
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
     @NotBlank

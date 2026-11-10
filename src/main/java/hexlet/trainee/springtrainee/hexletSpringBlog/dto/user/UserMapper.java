@@ -1,4 +1,4 @@
-package hexlet.trainee.springtrainee.hexletSpringBlog.dto;
+package hexlet.trainee.springtrainee.hexletSpringBlog.dto.user;
 
 import hexlet.trainee.springtrainee.hexletSpringBlog.model.User;
 import org.springframework.stereotype.Component;
@@ -13,5 +13,14 @@ public class UserMapper {
         dto.setCreatedAt(user.getCreatedAt());
         dto.setUpdatedAt(user.getUpdatedAt());
         return dto;
+    }
+
+    public User toEntity(UserCreateDTO dto) {
+        User user = new User();
+        user.setEmail(dto.getEmail());
+        user.setUsername(dto.getUsername());
+        user.setPassword(dto.getPassword());
+
+        return user;
     }
 }

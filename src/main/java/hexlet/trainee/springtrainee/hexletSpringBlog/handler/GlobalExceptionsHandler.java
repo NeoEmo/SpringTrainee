@@ -1,6 +1,7 @@
 package hexlet.trainee.springtrainee.hexletSpringBlog.handler;
 
 
+import hexlet.trainee.springtrainee.hexletSpringBlog.exception.ResourceAccessDeniedException;
 import hexlet.trainee.springtrainee.hexletSpringBlog.exception.ResourceAlreadyExistException;
 import hexlet.trainee.springtrainee.hexletSpringBlog.exception.ResourcesNotFoundException;
 import org.slf4j.Logger;
@@ -34,5 +35,15 @@ public class GlobalExceptionsHandler {
     @ExceptionHandler(ResourceAlreadyExistException.class)
     public ResponseEntity<Map<String, String>> handleAlreadyExist(ResourceAlreadyExistException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("message", ex.getMessage()));
+    }
+
+    @ExceptionHandler(ResourceAccessDeniedException.class)
+    public ResponseEntity<Map<String, String>> handleAccessDenied(ResourceAccessDeniedException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", ex.getMessage()));
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Map<String, String>> handleBadRequest(IllegalArgumentException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", ex.getMessage()));
     }
 }

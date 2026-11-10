@@ -1,7 +1,10 @@
 package hexlet.trainee.springtrainee.hexletSpringBlog.api.controller;
 
-import hexlet.trainee.springtrainee.hexletSpringBlog.dto.UserDTO;
-import hexlet.trainee.springtrainee.hexletSpringBlog.dto.UserMapper;
+import hexlet.trainee.springtrainee.hexletSpringBlog.dto.user.UserCreateDTO;
+import hexlet.trainee.springtrainee.hexletSpringBlog.dto.user.UserDTO;
+import hexlet.trainee.springtrainee.hexletSpringBlog.dto.user.UserMapper;
+import hexlet.trainee.springtrainee.hexletSpringBlog.dto.user.UserUpdateDTO;
+import hexlet.trainee.springtrainee.hexletSpringBlog.exception.ResourceAccessDeniedException;
 import hexlet.trainee.springtrainee.hexletSpringBlog.exception.ResourceAlreadyExistException;
 import hexlet.trainee.springtrainee.hexletSpringBlog.exception.ResourcesNotFoundException;
 import hexlet.trainee.springtrainee.hexletSpringBlog.model.User;
@@ -47,7 +50,13 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<User> post(@Valid @RequestBody User user) {
+    public ResponseEntity<UserDTO> post(@Valid @RequestBody UserCreateDTO data) {
+        if (!data.getPassword().equals(data.getConfirmPassword())) {
+            throw new IllegalArgumentException("Passwords do not match");
+        }
+
+        var user = userMapper.toEntity(data);
+
         if (usersRepository.existsByEmail(user.getEmail())) {
             throw new ResourceAlreadyExistException("Email already exist");
         }
@@ -64,7 +73,9 @@ public class UserController {
                 .buildAndExpand(user.getId())
                 .toUri();
 
-        return ResponseEntity.created(location).body(user);
+        var dto = userMapper.toDTO(user);
+
+        return ResponseEntity.created(location).body(dto);
     }
 
     @GetMapping("/{id}")
@@ -76,17 +87,23 @@ public class UserController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<User> patch(@PathVariable Long id, @RequestBody User data) {
+    public ResponseEntity<UserDTO> patch(@PathVariable Long id, @Valid @RequestBody UserUpdateDTO data) {
         var user = usersRepository.findById(id)
                 .orElseThrow(() -> new ResourcesNotFoundException("User with id " + id + " not found"));
 
+        // валидация по паролю
+        if (!user.getPassword().equals(data.getPassword())) {
+            throw new ResourceAccessDeniedException("Access denied");
+        }
 
         if (data.getEmail() != null) user.setEmail(data.getEmail());
-        if (data.getPassword() != null) user.setPassword(data.getPassword());
+        if (data.getNewPassword() != null) user.setPassword(data.getNewPassword());
         if (data.getUsername() != null) user.setUsername(data.getUsername());
         usersRepository.save(user);
 
-        return ResponseEntity.ok().body(user);
+        var dto = userMapper.toDTO(user);
+
+        return ResponseEntity.ok().body(dto);
     }
 
     @DeleteMapping("/{id}")

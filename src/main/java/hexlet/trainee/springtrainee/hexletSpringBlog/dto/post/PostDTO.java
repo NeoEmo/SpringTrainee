@@ -1,4 +1,4 @@
-package hexlet.trainee.springtrainee.hexletSpringBlog.dto;
+package hexlet.trainee.springtrainee.hexletSpringBlog.dto.post;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
@@ -10,11 +10,16 @@ import java.time.LocalDateTime;
 @Setter
 public class PostDTO {
     private Long id;
+
     private String title;
+
     private String content;
+
     private String author;
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updatedAt;
 }
