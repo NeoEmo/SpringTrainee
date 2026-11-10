@@ -1,5 +1,7 @@
 package hexlet.trainee.springtrainee.hexletSpringBlog.api.controller;
 
+import hexlet.trainee.springtrainee.hexletSpringBlog.dto.PostDTO;
+import hexlet.trainee.springtrainee.hexletSpringBlog.dto.PostMapper;
 import hexlet.trainee.springtrainee.hexletSpringBlog.exception.ResourceAlreadyExistException;
 import hexlet.trainee.springtrainee.hexletSpringBlog.exception.ResourcesNotFoundException;
 import hexlet.trainee.springtrainee.hexletSpringBlog.model.Post;
@@ -32,13 +34,17 @@ public class PostsController {
     @Autowired
     private PostsRepository postsRepository;
 
+    @Autowired
+    private PostMapper postMapper;
+
     @GetMapping
-    public ResponseEntity<Page<Post>> index(
+    public ResponseEntity<Page<PostDTO>> index(
             @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int size) {
         var safePage = Math.max(0, page - 1);
         Pageable result = PageRequest.of(safePage, size);
 
-        return ResponseEntity.ok().body(postsRepository.findByOrderByCreatedAtDesc(result));
+        return ResponseEntity.ok()
+                .body(postsRepository.findByOrderByCreatedAtDesc(result).map(postMapper::toDTO));
     }
 
     @PostMapping
@@ -59,8 +65,8 @@ public class PostsController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Post> show(@PathVariable Long id) {
-        var post = postsRepository.findById(id)
+    public ResponseEntity<PostDTO> show(@PathVariable Long id) {
+        var post = postsRepository.findById(id).map(postMapper::toDTO)
                 .orElseThrow(() -> new ResourcesNotFoundException("Post with id " + id + " not found"));
 
         return ResponseEntity.ok().body(post);

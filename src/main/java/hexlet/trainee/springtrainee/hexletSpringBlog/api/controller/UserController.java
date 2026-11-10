@@ -1,5 +1,7 @@
 package hexlet.trainee.springtrainee.hexletSpringBlog.api.controller;
 
+import hexlet.trainee.springtrainee.hexletSpringBlog.dto.UserDTO;
+import hexlet.trainee.springtrainee.hexletSpringBlog.dto.UserMapper;
 import hexlet.trainee.springtrainee.hexletSpringBlog.exception.ResourceAlreadyExistException;
 import hexlet.trainee.springtrainee.hexletSpringBlog.exception.ResourcesNotFoundException;
 import hexlet.trainee.springtrainee.hexletSpringBlog.model.User;
@@ -31,13 +33,17 @@ public class UserController {
     @Autowired
     private UsersRepository usersRepository;
 
+    @Autowired
+    private UserMapper userMapper;
+
     @GetMapping
-    public ResponseEntity<Page<User>> index(
+    public ResponseEntity<Page<UserDTO>> index(
             @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int size) {
         var safePage = Math.max(0, page - 1);
         var result = PageRequest.of(safePage, size);
 
-        return ResponseEntity.ok().body(usersRepository.findByOrderByCreatedAtDesc(result));
+        return ResponseEntity.ok()
+                .body(usersRepository.findByOrderByCreatedAtDesc(result).map(userMapper::toDTO));
     }
 
     @PostMapping
@@ -62,8 +68,8 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> get(@PathVariable Long id) {
-        var user = usersRepository.findById(id)
+    public ResponseEntity<UserDTO> get(@PathVariable Long id) {
+        var user = usersRepository.findById(id).map(userMapper::toDTO)
                 .orElseThrow(() -> new ResourcesNotFoundException("User with id " + id + " not found"));
 
         return ResponseEntity.ok().body(user);

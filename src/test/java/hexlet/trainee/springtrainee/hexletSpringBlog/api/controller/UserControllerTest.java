@@ -77,7 +77,6 @@ public class UserControllerTest {
                 .supply(Select.field(User::getPassword), () -> faker.credentials().password(10, 100))
                 .supply(Select.field(User::getUsername), () -> faker.fallout().character())
                 .create();
-
         userRepository.save(user);
         var request = delete("/api/users/" + user.getId());
 
