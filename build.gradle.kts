@@ -49,6 +49,11 @@ dependencies {
 
     // Source: https://mvnrepository.com/artifact/org.instancio/instancio-junit
     testImplementation("org.instancio:instancio-junit:6.2.1")
+
+    // Source: https://mvnrepository.com/artifact/org.mapstruct/mapstruct
+    implementation("org.mapstruct:mapstruct:1.6.3")
+    annotationProcessor("org.mapstruct:mapstruct-processor:1.6.3")
+    testAnnotationProcessor("org.mapstruct:mapstruct-processor:1.6.3")
 }
 
 tasks.withType<Test> {
