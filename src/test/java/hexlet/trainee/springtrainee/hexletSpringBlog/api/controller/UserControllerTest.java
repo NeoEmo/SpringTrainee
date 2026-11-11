@@ -49,16 +49,18 @@ public class UserControllerTest {
 
     @Test
     public void TestUpdate() throws Exception {
+        var password = faker.credentials().password(10, 100);
         var user = Instancio.of(User.class)
                 .ignore(Select.field(User::getId))
                 .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
-                .supply(Select.field(User::getPassword), () -> faker.credentials().password(10, 100))
+                .supply(Select.field(User::getPassword), () -> password)
                 .create();
 
         userRepository.save(user);
 
         var data = new HashMap<>();
         data.put("username", "HellKnight");
+        data.put("password", password);
 
         var request = patch("/api/users/" + user.getId())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -94,9 +96,11 @@ public class UserControllerTest {
     @Test
     public void TestCreate() throws Exception {
         var data = new HashMap<>();
+        var password = faker.credentials().password(10, 100);
         data.put("username", faker.fallout().character());
         data.put("email", faker.internet().emailAddress());
-        data.put("password", faker.credentials().password(10, 100));
+        data.put("password", password);
+        data.put("confirmPassword", password);
 
         var request = post("/api/users")
                 .contentType(MediaType.APPLICATION_JSON)

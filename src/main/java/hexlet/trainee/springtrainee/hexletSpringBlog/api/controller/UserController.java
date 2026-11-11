@@ -7,7 +7,6 @@ import hexlet.trainee.springtrainee.hexletSpringBlog.dto.user.UserUpdateDTO;
 import hexlet.trainee.springtrainee.hexletSpringBlog.exception.ResourceAccessDeniedException;
 import hexlet.trainee.springtrainee.hexletSpringBlog.exception.ResourceAlreadyExistException;
 import hexlet.trainee.springtrainee.hexletSpringBlog.exception.ResourcesNotFoundException;
-import hexlet.trainee.springtrainee.hexletSpringBlog.model.User;
 
 import hexlet.trainee.springtrainee.hexletSpringBlog.repository.UsersRepository;
 import jakarta.validation.Valid;
@@ -96,9 +95,7 @@ public class UserController {
             throw new ResourceAccessDeniedException("Access denied");
         }
 
-        if (data.getEmail() != null) user.setEmail(data.getEmail());
-        if (data.getNewPassword() != null) user.setPassword(data.getNewPassword());
-        if (data.getUsername() != null) user.setUsername(data.getUsername());
+        userMapper.updateEntity(data, user);
         usersRepository.save(user);
 
         var dto = userMapper.toDTO(user);

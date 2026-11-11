@@ -82,11 +82,8 @@ public class PostsController {
         var post = postsRepository.findById(id)
                 .orElseThrow(() -> new ResourcesNotFoundException("Post with id " + id + " not found"));
 
-        if (data.getTitle() != null) post.setTitle(data.getTitle());
-        if (data.getContent() != null) post.setContent(data.getContent());
-        if (data.getAuthor() != null) post.setAuthor(data.getAuthor());
+        postMapper.updateEntityFromDTO(data, post);
         postsRepository.save(post);
-
         var dto = postMapper.toDTO(post);
 
         return ResponseEntity.ok().body(dto);

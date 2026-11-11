@@ -1,26 +1,20 @@
 package hexlet.trainee.springtrainee.hexletSpringBlog.dto.post;
 
 import hexlet.trainee.springtrainee.hexletSpringBlog.model.Post;
+import org.mapstruct.Mapper;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
+import org.mapstruct.ReportingPolicy;
 import org.springframework.stereotype.Component;
 
-@Component
-public class PostMapper {
-    public PostDTO toDTO(Post post) {
-        PostDTO dto = new PostDTO();
-        dto.setId(post.getId());
-        dto.setTitle(post.getTitle());
-        dto.setContent(post.getContent());
-        dto.setAuthor(post.getAuthor());
-        dto.setCreatedAt(post.getCreatedAt());
-        dto.setUpdatedAt(post.getUpdatedAt());
-        return dto;
-    }
+@Mapper(componentModel = "spring",
+        unmappedTargetPolicy = ReportingPolicy.IGNORE,
+        nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+public interface PostMapper {
 
-    public Post toEntity(PostCreateDTO dto) {
-        Post post = new Post();
-        post.setTitle(dto.getTitle());
-        post.setContent(dto.getContent());
-        post.setAuthor(dto.getAuthor());
-        return post;
-    }
+    PostDTO toDTO(Post post);
+
+    Post toEntity(PostCreateDTO dto);
+
+    void updateEntityFromDTO(PostUpdateDTO dto, @MappingTarget Post post);
 }
