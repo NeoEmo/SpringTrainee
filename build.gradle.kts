@@ -54,6 +54,9 @@ dependencies {
     implementation("org.mapstruct:mapstruct:1.6.3")
     annotationProcessor("org.mapstruct:mapstruct-processor:1.6.3")
     testAnnotationProcessor("org.mapstruct:mapstruct-processor:1.6.3")
+
+    // Source: https://mvnrepository.com/artifact/org.openapitools/jackson-databind-nullable
+    implementation("org.openapitools:jackson-databind-nullable:0.2.13")
 }
 
 tasks.withType<Test> {

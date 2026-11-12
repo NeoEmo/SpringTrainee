@@ -1,13 +1,16 @@
-package hexlet.trainee.springtrainee.hexletSpringBlog.dto.post;
+package hexlet.trainee.springtrainee.hexletSpringBlog.mappers;
 
+import hexlet.trainee.springtrainee.hexletSpringBlog.dto.post.PostCreateDTO;
+import hexlet.trainee.springtrainee.hexletSpringBlog.dto.post.PostDTO;
+import hexlet.trainee.springtrainee.hexletSpringBlog.dto.post.PostPatchDTO;
 import hexlet.trainee.springtrainee.hexletSpringBlog.model.Post;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.ReportingPolicy;
-import org.springframework.stereotype.Component;
 
-@Mapper(componentModel = "spring",
+@Mapper(uses = {JsonNullableMapper.class},
+        componentModel = "spring",
         unmappedTargetPolicy = ReportingPolicy.IGNORE,
         nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface PostMapper {
@@ -16,5 +19,5 @@ public interface PostMapper {
 
     Post toEntity(PostCreateDTO dto);
 
-    void updateEntityFromDTO(PostUpdateDTO dto, @MappingTarget Post post);
+    void updateEntityFromDTO(PostPatchDTO dto, @MappingTarget Post post);
 }

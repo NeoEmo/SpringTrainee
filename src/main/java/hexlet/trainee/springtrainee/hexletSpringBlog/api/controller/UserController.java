@@ -2,8 +2,8 @@ package hexlet.trainee.springtrainee.hexletSpringBlog.api.controller;
 
 import hexlet.trainee.springtrainee.hexletSpringBlog.dto.user.UserCreateDTO;
 import hexlet.trainee.springtrainee.hexletSpringBlog.dto.user.UserDTO;
-import hexlet.trainee.springtrainee.hexletSpringBlog.dto.user.UserMapper;
-import hexlet.trainee.springtrainee.hexletSpringBlog.dto.user.UserUpdateDTO;
+import hexlet.trainee.springtrainee.hexletSpringBlog.dto.user.UserPatchDTO;
+import hexlet.trainee.springtrainee.hexletSpringBlog.mappers.UserMapper;
 import hexlet.trainee.springtrainee.hexletSpringBlog.exception.ResourceAccessDeniedException;
 import hexlet.trainee.springtrainee.hexletSpringBlog.exception.ResourceAlreadyExistException;
 import hexlet.trainee.springtrainee.hexletSpringBlog.exception.ResourcesNotFoundException;
@@ -86,7 +86,7 @@ public class UserController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<UserDTO> patch(@PathVariable Long id, @Valid @RequestBody UserUpdateDTO data) {
+    public ResponseEntity<UserDTO> patch(@PathVariable Long id, @Valid @RequestBody UserPatchDTO data) {
         var user = usersRepository.findById(id)
                 .orElseThrow(() -> new ResourcesNotFoundException("User with id " + id + " not found"));
 

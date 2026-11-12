@@ -1,13 +1,12 @@
 package hexlet.trainee.springtrainee.hexletSpringBlog.api.controller;
 
-import hexlet.trainee.springtrainee.hexletSpringBlog.dto.post.PostCreateDTO;
-import hexlet.trainee.springtrainee.hexletSpringBlog.dto.post.PostDTO;
-import hexlet.trainee.springtrainee.hexletSpringBlog.dto.post.PostMapper;
-import hexlet.trainee.springtrainee.hexletSpringBlog.dto.post.PostUpdateDTO;
+import hexlet.trainee.springtrainee.hexletSpringBlog.dto.post.*;
 import hexlet.trainee.springtrainee.hexletSpringBlog.exception.ResourceAlreadyExistException;
 import hexlet.trainee.springtrainee.hexletSpringBlog.exception.ResourcesNotFoundException;
 
+import hexlet.trainee.springtrainee.hexletSpringBlog.mappers.PostMapper;
 import hexlet.trainee.springtrainee.hexletSpringBlog.repository.PostsRepository;
+import hexlet.trainee.springtrainee.hexletSpringBlog.repository.UsersRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -36,6 +35,9 @@ public class PostsController {
     private PostsRepository postsRepository;
 
     @Autowired
+    UsersRepository userRepository;
+
+    @Autowired
     private PostMapper postMapper;
 
     @GetMapping
@@ -50,12 +52,17 @@ public class PostsController {
 
     @PostMapping
     public ResponseEntity<PostDTO> create(@Valid @RequestBody PostCreateDTO data) {
+        var user = userRepository.findById(data.getUserId())
+                .orElseThrow(() -> new ResourcesNotFoundException("User with id" + data.getUserId() + " not found"));
+
+
         var post = postMapper.toEntity(data);
 
         if (postsRepository.existsByTitle(post.getTitle())) {
             throw new ResourceAlreadyExistException("Title already exists");
         }
 
+        post.setAuthor(user);
         post = postsRepository.save(post);
 
         URI location = ServletUriComponentsBuilder
@@ -78,15 +85,15 @@ public class PostsController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<PostDTO> update(@PathVariable Long id, @Valid @RequestBody PostUpdateDTO data) {
+    public ResponseEntity<PostDTO> update(@PathVariable Long id, @Valid @RequestBody PostPatchDTO data) {
         var post = postsRepository.findById(id)
                 .orElseThrow(() -> new ResourcesNotFoundException("Post with id " + id + " not found"));
 
         postMapper.updateEntityFromDTO(data, post);
-        postsRepository.save(post);
-        var dto = postMapper.toDTO(post);
 
-        return ResponseEntity.ok().body(dto);
+        postsRepository.save(post);
+
+        return ResponseEntity.ok().body(postMapper.toDTO(post));
     }
 
     @DeleteMapping("/{id}")

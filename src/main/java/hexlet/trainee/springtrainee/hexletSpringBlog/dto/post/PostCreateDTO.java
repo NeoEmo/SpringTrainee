@@ -17,6 +17,5 @@ public class PostCreateDTO {
     @Size(min = 10)
     private  String content;
 
-    @NotBlank
-    private String author;
+    private Long userId;
 }
