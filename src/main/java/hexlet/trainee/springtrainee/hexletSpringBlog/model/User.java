@@ -50,7 +50,7 @@ public class User {
     private LocalDateTime updatedAt;
 
     @OneToMany(
-            mappedBy = "user",
+            mappedBy = "author",
             cascade = CascadeType.ALL,
             orphanRemoval = true,
             fetch = FetchType.LAZY)

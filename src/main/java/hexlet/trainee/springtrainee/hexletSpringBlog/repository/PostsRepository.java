@@ -6,9 +6,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface PostsRepository extends JpaRepository<Post,Long> {
     Page<Post> findByOrderByCreatedAtDesc(Pageable pageable);
-    boolean existsByTitle(String title);
-
+    Page<Post> findByAuthorId(Long userId, Pageable pageable);
+    Optional<Post> findBySlug(String slug);
 }
