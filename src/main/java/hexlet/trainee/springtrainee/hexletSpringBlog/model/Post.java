@@ -42,6 +42,10 @@ public class Post implements BaseEntity {
 
     @NotBlank
     @ToString.Include
+    private String name;
+
+    @NotBlank
+    @ToString.Include
     private String authorName;
 
     @NotNull

@@ -22,4 +22,6 @@ public class PostPatchDTO {
     private JsonNullable<String> authorName;
 
     private JsonNullable<List<TagCreateDTO>> tags;
+
+    private JsonNullable<String> name;
 }

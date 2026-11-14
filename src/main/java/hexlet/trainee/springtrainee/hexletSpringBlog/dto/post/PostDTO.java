@@ -18,6 +18,8 @@ public class PostDTO {
 
     private String content;
 
+    private String name;
+
     @NotNull
     private Long userId;
 

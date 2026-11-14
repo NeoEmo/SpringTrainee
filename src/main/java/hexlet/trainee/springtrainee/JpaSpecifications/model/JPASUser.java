@@ -1,12 +1,17 @@
 package hexlet.trainee.springtrainee.JpaSpecifications.model;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
-
+@Entity
+@Table(name = "jpas_users")
+@Getter
+@Setter
 public class JPASUser {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String fullName;

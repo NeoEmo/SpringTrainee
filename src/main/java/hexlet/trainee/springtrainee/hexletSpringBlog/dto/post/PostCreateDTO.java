@@ -25,6 +25,9 @@ public class PostCreateDTO {
     private Long userId;
 
     @NotNull
+    private String name;
+
+    @NotNull
     private String authorName;
 
     private List<TagCreateDTO> tags;

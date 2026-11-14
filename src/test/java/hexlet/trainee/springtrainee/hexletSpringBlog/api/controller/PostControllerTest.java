@@ -113,6 +113,7 @@ public class PostControllerTest {
         dto.setAuthorName(JsonNullable.of("new Name"));
         dto.setContent(JsonNullable.of("new Content"));
         dto.setSlug(JsonNullable.of("new Slug1234567890"));
+        dto.setName(JsonNullable.of("new Name"));
 
         var request = patch("/api/posts/" + testPost.getId())
                 .contentType(MediaType.APPLICATION_JSON)
