@@ -1,13 +1,16 @@
 package hexlet.trainee.springtrainee.hexletSpringBlog.api.controller;
 
+import hexlet.trainee.springtrainee.hexletSpringBlog.dto.post.PostDTO;
 import hexlet.trainee.springtrainee.hexletSpringBlog.dto.user.UserCreateDTO;
 import hexlet.trainee.springtrainee.hexletSpringBlog.dto.user.UserDTO;
 import hexlet.trainee.springtrainee.hexletSpringBlog.dto.user.UserPatchDTO;
+import hexlet.trainee.springtrainee.hexletSpringBlog.mappers.PostMapper;
 import hexlet.trainee.springtrainee.hexletSpringBlog.mappers.UserMapper;
 import hexlet.trainee.springtrainee.hexletSpringBlog.exception.ResourceAccessDeniedException;
 import hexlet.trainee.springtrainee.hexletSpringBlog.exception.ResourceAlreadyExistException;
 import hexlet.trainee.springtrainee.hexletSpringBlog.exception.ResourcesNotFoundException;
 
+import hexlet.trainee.springtrainee.hexletSpringBlog.repository.PostsRepository;
 import hexlet.trainee.springtrainee.hexletSpringBlog.repository.UsersRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +37,12 @@ public class UserController {
 
     @Autowired
     private UsersRepository usersRepository;
+
+    @Autowired
+    private PostsRepository postsRepository;
+
+    @Autowired
+    private PostMapper postMapper;
 
     @Autowired
     private UserMapper userMapper;
@@ -110,5 +119,25 @@ public class UserController {
         }
         usersRepository.deleteById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    //Вложенные пути
+
+    @GetMapping("/{id}/posts")
+    public ResponseEntity<Page<PostDTO>> getUsersPosts(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        if (!usersRepository.existsById(id)) {
+            throw new ResourcesNotFoundException("User with id " + id + " not found");
+        }
+
+        var safePage = Math.max(0, page - 1);
+        var pageable = PageRequest.of(safePage, size);
+
+        var posts = postsRepository.findByAuthorId(id, pageable);
+
+        return  ResponseEntity.ok().body(posts.map(postMapper::toDTO));
     }
 }
