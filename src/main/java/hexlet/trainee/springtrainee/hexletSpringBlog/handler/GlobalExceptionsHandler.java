@@ -6,6 +6,7 @@ import hexlet.trainee.springtrainee.hexletSpringBlog.exception.ResourceAlreadyEx
 import hexlet.trainee.springtrainee.hexletSpringBlog.exception.ResourcesNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -21,6 +22,13 @@ public class GlobalExceptionsHandler {
     @ExceptionHandler(ResourcesNotFoundException.class)
     public ResponseEntity<Map<String, String>> handleNotFound(ResourcesNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", ex.getMessage()));
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Map<String, String>> handleDataIntegrity(DataIntegrityViolationException ex) {
+        log.warn("Data integrity violation: {}", ex.getMostSpecificCause().getMessage());
+        String message = "Resource already exists or violates a constraint";
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("message", message));
     }
 
     @ExceptionHandler(Exception.class)

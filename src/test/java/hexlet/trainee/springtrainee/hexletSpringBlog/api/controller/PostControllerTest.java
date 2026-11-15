@@ -123,7 +123,7 @@ public class PostControllerTest {
 
         post = postsRepository.findById(testPost.getId()).get();
 
-        assertThat(post.getAuthorName()).isEqualTo(dto.getAuthorName().get());
+        assertThat(post.getName()).isEqualTo(dto.getAuthorName().get());
     }
 
     @Test

@@ -27,5 +27,6 @@ public interface PostMapper {
 
     @Mapping(target = "author", ignore = true)
     @Mapping(target = "tags", ignore = true)
+    @Mapping(target = "authorName", ignore = true)
     void updateEntityFromDTO(PostPatchDTO dto, @MappingTarget Post post);
 }

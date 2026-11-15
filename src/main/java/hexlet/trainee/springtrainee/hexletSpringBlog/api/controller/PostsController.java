@@ -1,24 +1,20 @@
 package hexlet.trainee.springtrainee.hexletSpringBlog.api.controller;
 
-import hexlet.trainee.springtrainee.hexletSpringBlog.dto.post.*;
+import hexlet.trainee.springtrainee.hexletSpringBlog.dto.post.PostCreateDTO;
+import hexlet.trainee.springtrainee.hexletSpringBlog.dto.post.PostDTO;
+import hexlet.trainee.springtrainee.hexletSpringBlog.dto.post.PostParamsDTO;
+import hexlet.trainee.springtrainee.hexletSpringBlog.dto.post.PostPatchDTO;
 import hexlet.trainee.springtrainee.hexletSpringBlog.dto.tag.TagCreateDTO;
 import hexlet.trainee.springtrainee.hexletSpringBlog.dto.tag.TagDTO;
-import hexlet.trainee.springtrainee.hexletSpringBlog.exception.ResourceAlreadyExistException;
 import hexlet.trainee.springtrainee.hexletSpringBlog.exception.ResourcesNotFoundException;
 
-import hexlet.trainee.springtrainee.hexletSpringBlog.mappers.PostMapper;
 import hexlet.trainee.springtrainee.hexletSpringBlog.mappers.TagMapper;
-import hexlet.trainee.springtrainee.hexletSpringBlog.model.Post;
 import hexlet.trainee.springtrainee.hexletSpringBlog.repository.PostsRepository;
 import hexlet.trainee.springtrainee.hexletSpringBlog.repository.UsersRepository;
-import hexlet.trainee.springtrainee.hexletSpringBlog.specification.PostSpecification;
+import hexlet.trainee.springtrainee.hexletSpringBlog.service.PostService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,7 +27,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.net.URI;
 import java.util.List;
 
 
@@ -40,19 +35,7 @@ import java.util.List;
 public class PostsController {
 
     @Autowired
-    private PostsRepository postsRepository;
-
-    @Autowired
-    UsersRepository userRepository;
-
-    @Autowired
-    private PostMapper postMapper;
-
-    @Autowired
-    private TagMapper tagMapper;
-
-    @Autowired
-    private PostSpecification specBuilder;
+    private PostService postService;
 
     @GetMapping
     public ResponseEntity<Page<PostDTO>> index(
@@ -60,84 +43,40 @@ public class PostsController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
 
-        var safePage = Math.max(0, page - 1);
-        Pageable pageable = PageRequest.of(safePage, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-
-        Specification<Post> spec = specBuilder.build(params);
-        var posts = postsRepository.findAll(spec, pageable);
-
-        return ResponseEntity.ok(posts.map(postMapper::toDTO));
+        return ResponseEntity.ok(postService.index(params, page, size));
     }
 
     @PostMapping
     public ResponseEntity<PostDTO> create(@Valid @RequestBody PostCreateDTO data) {
-        var user = userRepository.findById(data.getUserId())
-                .orElseThrow(() -> new ResourcesNotFoundException("User with id " + data.getUserId() + " not found"));
-
-        var post = postMapper.toEntity(data);
-
-        if(postsRepository.findBySlug(post.getSlug()).isPresent()) {
-            throw new ResourceAlreadyExistException("Slug \"" + post.getSlug() + "\" already exists");
-        }
-
-        post.setAuthor(user);
-        post =  postsRepository.save(post);
-
+        var dto = postService.create(data);
         var location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")
-                .buildAndExpand(post.getId())
+                .buildAndExpand(dto.getId())
                 .toUri();
 
-        return ResponseEntity.created(location).body(postMapper.toDTO(post));
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<PostDTO> show(@PathVariable Long id) {
-        var post = postsRepository.findById(id)
-                .map(postMapper::toDTO)
-                .orElseThrow(() -> new ResourcesNotFoundException("Post with id " + id + " not found"));
-
-        return ResponseEntity.ok().body(post);
+        return ResponseEntity.created(location).body(dto);
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<PostDTO> update(@PathVariable Long id, @Valid @RequestBody PostPatchDTO data) {
-        var post = postsRepository.findById(id)
-                .orElseThrow(() -> new ResourcesNotFoundException("Post with id " + id + " not found"));
+        return ResponseEntity.ok().body(postService.update(data, id));
+    }
 
-        if (data.getUserId() != null && data.getUserId().isPresent() && data.getUserId().get() != null) {
-            var newUserId = data.getUserId().get();
-            var newAuthor = userRepository.findById(newUserId)
-                    .orElseThrow(() -> new ResourcesNotFoundException("User with id " + newUserId + " not found"));
-
-            post.setAuthor(newAuthor);
-        }
-
-        postMapper.updateEntityFromDTO(data, post);
-        postsRepository.save(post);
-        return ResponseEntity.ok().body(postMapper.toDTO(post));
+    @GetMapping("/{id}")
+    public ResponseEntity<PostDTO> show(@PathVariable Long id) {
+        return ResponseEntity.ok().body(postService.findById(id));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id) {
-        if (!postsRepository.existsById(id)) {
-            return ResponseEntity.notFound().build();
-        }
-        postsRepository.deleteById(id);
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        postService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{postId}/tags")
     public ResponseEntity<List<TagDTO>> getPostTags(@PathVariable Long postId) {
-        var post = postsRepository.findById(postId)
-                .orElseThrow(() -> new ResourcesNotFoundException("Post with id " + postId + " not found"));
-
-        var tags = post.getTags().stream()
-                .map(tagMapper::toDTO)
-                .toList();
-
-        return ResponseEntity.ok().body(tags);
+        return ResponseEntity.ok().body(postService.getPostTags(postId));
     }
 
     @PostMapping("/{postId}/tags")
@@ -145,21 +84,14 @@ public class PostsController {
             @PathVariable Long postId,
             @Valid @RequestBody TagCreateDTO data) {
 
-        var post = postsRepository.findById(postId)
-                .orElseThrow(() -> new ResourcesNotFoundException("Post with id " + postId + " not found"));
-
-        var tag = tagMapper.toEntity(data);
-        tag.setPost(post);
-
-        post.getTags().add(tag);
-        postsRepository.save(post);
+        var dto = postService.createTagForPost(postId, data);
 
         var location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")
-                .buildAndExpand(tag.getId())
+                .buildAndExpand(dto.getId())
                 .toUri();
 
-        return ResponseEntity.created(location).body(tagMapper.toDTO(tag));
+        return ResponseEntity.created(location).body(dto);
     }
 }
