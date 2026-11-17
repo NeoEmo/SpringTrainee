@@ -1,0 +1,50 @@
+/* Базовые настройки для всей страницы */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: #f4f7f6; /* Очень светлый, приятный серо-зеленоватый фон */
+    color: #333333;
+    /* Делаем так, чтобы контент был по центру экрана */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    text-align: center;
+}
+
+/* Стили для заголовков */
+.h1, h1 {
+    color: #2c3e50; /* Темно-синий, строгий цвет */
+    font-size: 2.5rem;
+    margin-bottom: 24px;
+    font-weight: 600;
+}
+
+/* Стили для картинок */
+.img, img {
+    max-width: 150px;
+    height: auto;
+    margin-bottom: 24px;
+    border-radius: 12px; /* Легкое скругление углов */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Аккуратная тень */
+    transition: transform 0.3s ease; /* Плавная анимация при наведении */
+}
+
+/* Эффект при наведении на картинку (чтобы было не скучно) */
+.img:hover, img:hover {
+    transform: scale(1.05);
+}
+
+/* Стили для текста (на странице about.html) */
+.p, p {
+    font-size: 1.2rem;
+    color: #555555;
+    line-height: 1.6;
+    max-width: 600px;
+    background: #ffffff;
+    padding: 15px 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}

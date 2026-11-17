@@ -53,11 +53,7 @@ public class PostService {
         return repository.findAll(spec, pageable).map(mapper::toDTO);
     }
 
-    public PostDTO create(PostCreateDTO data) {
-        var author = usersRepository.findById(data.getUserId())
-                .orElseThrow(() -> new ResourcesNotFoundException("User with id " + data.getUserId() + " not found"));
-
-
+    public PostDTO create(PostCreateDTO data, User author) {
         var post = mapper.toEntity(data);
 
         if (repository.findBySlug(post.getSlug()).isPresent()) {

@@ -4,11 +4,13 @@ package hexlet.trainee.springtrainee.hexletSpringBlog.handler;
 import hexlet.trainee.springtrainee.hexletSpringBlog.exception.ResourceAccessDeniedException;
 import hexlet.trainee.springtrainee.hexletSpringBlog.exception.ResourceAlreadyExistException;
 import hexlet.trainee.springtrainee.hexletSpringBlog.exception.ResourcesNotFoundException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -53,5 +55,10 @@ public class GlobalExceptionsHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, String>> handleBadRequest(IllegalArgumentException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", ex.getMessage()));
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<Map<String, String>> handleAuthentication(AuthenticationException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Invalid username or password"));
     }
 }

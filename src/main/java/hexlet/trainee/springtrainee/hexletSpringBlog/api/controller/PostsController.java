@@ -9,13 +9,16 @@ import hexlet.trainee.springtrainee.hexletSpringBlog.dto.tag.TagDTO;
 import hexlet.trainee.springtrainee.hexletSpringBlog.exception.ResourcesNotFoundException;
 
 import hexlet.trainee.springtrainee.hexletSpringBlog.mappers.TagMapper;
+import hexlet.trainee.springtrainee.hexletSpringBlog.model.User;
 import hexlet.trainee.springtrainee.hexletSpringBlog.repository.PostsRepository;
 import hexlet.trainee.springtrainee.hexletSpringBlog.repository.UsersRepository;
 import hexlet.trainee.springtrainee.hexletSpringBlog.service.PostService;
+import hexlet.trainee.springtrainee.hexletSpringBlog.utils.UserUtils;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -37,6 +40,9 @@ public class PostsController {
     @Autowired
     private PostService postService;
 
+    @Autowired
+    private UserUtils userUtils;
+
     @GetMapping
     public ResponseEntity<Page<PostDTO>> index(
             PostParamsDTO params,
@@ -48,7 +54,7 @@ public class PostsController {
 
     @PostMapping
     public ResponseEntity<PostDTO> create(@Valid @RequestBody PostCreateDTO data) {
-        var dto = postService.create(data);
+        var dto = postService.create(data, userUtils.getCurrentUser());
         var location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")

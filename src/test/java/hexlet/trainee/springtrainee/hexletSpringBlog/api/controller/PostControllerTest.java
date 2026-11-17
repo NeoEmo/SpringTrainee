@@ -1,11 +1,13 @@
 package hexlet.trainee.springtrainee.hexletSpringBlog.api.controller;
 
+import hexlet.trainee.springtrainee.hexletSpringBlog.dto.post.PostCreateDTO;
 import hexlet.trainee.springtrainee.hexletSpringBlog.dto.post.PostPatchDTO;
 import hexlet.trainee.springtrainee.hexletSpringBlog.mappers.PostMapper;
 import hexlet.trainee.springtrainee.hexletSpringBlog.model.Post;
 import hexlet.trainee.springtrainee.hexletSpringBlog.model.User;
 import hexlet.trainee.springtrainee.hexletSpringBlog.repository.PostsRepository;
 import hexlet.trainee.springtrainee.hexletSpringBlog.repository.UsersRepository;
+import hexlet.trainee.springtrainee.hexletSpringBlog.utils.JWTUtils;
 
 import jakarta.transaction.Transactional;
 import net.datafaker.Faker;
@@ -18,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
 
@@ -29,6 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 //@Transactional Каждый тест как транзакция и затем Rollback, но данная реализация тестов ломает его, поэтому отключен
 public class PostControllerTest {
     @Autowired
@@ -47,10 +51,14 @@ public class PostControllerTest {
     private UsersRepository userRepository;
 
     @Autowired
+    private JWTUtils jwtUtils;
+
+    @Autowired
     private Faker faker;
 
     private User testUser;
     private Post testPost;
+    private String token;
 
     @BeforeEach
     public void setup() {
@@ -63,6 +71,7 @@ public class PostControllerTest {
                 .create();
 
         testUser = userRepository.save(testUser);
+        token = jwtUtils.generateToken(testUser.getUsername());
 
         testPost = Instancio.of(Post.class)
                 .ignore(Select.field(Post::getId))
@@ -86,44 +95,39 @@ public class PostControllerTest {
 
     @Test
     public void testCreate() throws Exception {
-        var post = testPost;
-        post.setSlug("Another great day 13.11.2026");
-        var dto = postMapper.toDTO(testPost);
+        var dto = new PostCreateDTO();
+        dto.setSlug("Another great day 13.11.2026");
+        dto.setName("The Post name");
+        dto.setContent("The Post content. This is a long enough content for validation.");
 
         var request = post("/api/posts")
+                .headers(headers -> headers.add("Authorization", "Bearer " + token))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto));
 
         mockMvc.perform(request).andExpect(status().isCreated());
 
-        post = postsRepository.findBySlug(dto.getSlug()).get();
-        assertNotNull(post);
-        assertThat(post.getAuthorName())
-                .isEqualTo(dto.getAuthorName())
-                .isEqualTo(testUser.getUsername());
+        var savedPost = postsRepository.findBySlug(dto.getSlug()).get();
+        assertNotNull(savedPost);
+        assertThat(savedPost.getAuthorName()).isEqualTo(testUser.getUsername());
     }
 
     @Test
     public void testUpdate() throws Exception {
-        var post = testPost;
-        post.setSlug("Another great day 14.11.2026");
-        postsRepository.save(post);
-
         var dto = new PostPatchDTO();
-        dto.setAuthorName(JsonNullable.of("new Name"));
-        dto.setContent(JsonNullable.of("new Content"));
-        dto.setSlug(JsonNullable.of("new Slug1234567890"));
-        dto.setName(JsonNullable.of("new Name"));
+        dto.setContent(JsonNullable.of("New content"));
+        dto.setSlug(JsonNullable.of("Another great day 14.11.2026"));
+        dto.setName(JsonNullable.of("The new Post name"));
 
         var request = patch("/api/posts/" + testPost.getId())
+                .headers(headers -> headers.add("Authorization", "Bearer " + token))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto));
 
         mockMvc.perform(request).andExpect(status().isOk());
 
-        post = postsRepository.findById(testPost.getId()).get();
-
-        assertThat(post.getName()).isEqualTo(dto.getAuthorName().get());
+        var updatedPost = postsRepository.findById(testPost.getId()).get();
+        assertThat(updatedPost.getName()).isEqualTo(dto.getName().get());
     }
 
     @Test
@@ -143,7 +147,8 @@ public class PostControllerTest {
     @Test
     public void testDelete() throws Exception {
         postsRepository.save(testPost);
-        var request = delete("/api/posts/" + testPost.getId());
+        var request = delete("/api/posts/" + testPost.getId())
+                .headers(headers -> headers.add("Authorization", "Bearer " + token));
         mockMvc.perform(request).andExpect(status().isNoContent());
 
         assertThat(postsRepository.existsById(testPost.getId())).isFalse();

@@ -18,6 +18,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -47,6 +48,9 @@ public class UserController {
     @Autowired
     private UserMapper userMapper;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @GetMapping
     public ResponseEntity<Page<UserDTO>> index(
             @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int size) {
@@ -64,6 +68,8 @@ public class UserController {
         }
 
         var user = userMapper.toEntity(data);
+
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         if (usersRepository.existsByEmail(user.getEmail())) {
             throw new ResourceAlreadyExistException("Email already exist");
